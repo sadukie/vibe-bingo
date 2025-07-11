@@ -33,6 +33,25 @@ namespace VibeBingo.ConsoleApp
         static void StartNewRound(BingoGame game)
         {
             game.StartNewRound();
+            // TTS voice selection
+            string? selectedVoice = null;
+            using (var synth = new System.Speech.Synthesis.SpeechSynthesizer())
+            {
+                var voices = synth.GetInstalledVoices().Select(v => v.VoiceInfo).ToList();
+                Console.WriteLine("Select TTS voice:");
+                for (int i = 0; i < voices.Count; i++)
+                {
+                    var v = voices[i];
+                    Console.WriteLine($"{i}. {v.Name} ({v.Culture}){(v.Name == synth.Voice.Name ? " [default]" : "")}");
+                }
+                Console.Write($"Enter choice (0-{voices.Count - 1}, Enter for default): ");
+                var vinput = Console.ReadLine();
+                int vidx = 0;
+                if (!string.IsNullOrWhiteSpace(vinput) && int.TryParse(vinput, out int tmp) && tmp >= 0 && tmp < voices.Count)
+                    vidx = tmp;
+                selectedVoice = voices[vidx].Name;
+            }
+
             int[] delays = { 0, 5000, 10000, 15000, 20000 };
             string[] delayLabels = { "Disabled", "5s", "10s", "15s", "20s" };
             int delayIdx = 0;
@@ -67,7 +86,7 @@ namespace VibeBingo.ConsoleApp
                         if (ball != null)
                         {
                             RedrawGridWithStatus(game);
-                            SpeakBall(ball);
+                            SpeakBall(ball, selectedVoice);
                         }
                     }
                     for (int i = 0; i < autoDelay / 500 && !autoCallToken.IsCancellationRequested; i++)
@@ -103,7 +122,7 @@ namespace VibeBingo.ConsoleApp
                     if (ball != null)
                     {
                         RedrawGridWithStatus(game);
-                        SpeakBall(ball);
+                        SpeakBall(ball, selectedVoice);
                     }
                 }
             }
@@ -174,11 +193,15 @@ namespace VibeBingo.ConsoleApp
             AnsiConsole.MarkupLine("[grey]Press Enter to call next ball, 'p' to pause/resume auto-call, 'q' to quit this round.[/]");
         }
 
-        static void SpeakBall(string ball)
+        static void SpeakBall(string ball, string? voiceName)
         {
             try
             {
                 using var synth = new System.Speech.Synthesis.SpeechSynthesizer();
+                if (!string.IsNullOrEmpty(voiceName))
+                {
+                    try { synth.SelectVoice(voiceName); } catch { /* ignore if not found */ }
+                }
                 synth.Speak(ball.Replace("B", "B ").Replace("I", "I ").Replace("N", "N ").Replace("G", "G ").Replace("O", "O "));
             }
             catch
