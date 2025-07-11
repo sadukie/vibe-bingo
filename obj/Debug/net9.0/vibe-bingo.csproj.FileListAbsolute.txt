@@ -1,0 +1,5 @@
+D:\code\personal\vibe-bingo\obj\Debug\net9.0\vibe-bingo.csproj.AssemblyReference.cache
+D:\code\personal\vibe-bingo\obj\Debug\net9.0\vibe-bingo.GeneratedMSBuildEditorConfig.editorconfig
+D:\code\personal\vibe-bingo\obj\Debug\net9.0\vibe-bingo.AssemblyInfoInputs.cache
+D:\code\personal\vibe-bingo\obj\Debug\net9.0\vibe-bingo.AssemblyInfo.cs
+D:\code\personal\vibe-bingo\obj\Debug\net9.0\vibe-bingo.csproj.CoreCompileInputs.cache

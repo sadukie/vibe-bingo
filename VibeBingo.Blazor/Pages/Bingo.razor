@@ -1,0 +1,76 @@
+@page "/bingo"
+@using VibeBingo.Core
+
+<PageTitle>Bingo Caller</PageTitle>
+
+<h1>Bingo Caller</h1>
+
+<div class="mb-3">
+    <button class="btn btn-primary me-2" @onclick="StartNewRound">Start New Round</button>
+    <button class="btn btn-success" @onclick="CallNextBall" [disabled]="!canCall">Call Next Ball</button>
+</div>
+
+@if (lastBall != null)
+{
+    <div class="alert alert-info">Last Ball: <strong>@lastBall</strong></div>
+}
+
+<div class="mb-2">Balls Remaining: @game.BallsRemaining</div>
+
+<table class="table table-bordered text-center w-auto">
+    <thead>
+        <tr>
+            @foreach (var col in labels)
+            {
+                <th>@col</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @for (int row = 0; row < 15; row++)
+        {
+            <tr>
+                @for (int col = 0; col < 5; col++)
+                {
+                    int number = 1 + row + col * 15;
+                    string letter = labels[col];
+                    string ball = $"{letter}{number}";
+                    bool called = game.CalledBalls.Contains(ball);
+                    bool highlight = lastBall == ball;
+                    <td style="background:@(highlight ? "#ffe066" : called ? "#b6fcb6" : "#fff"); font-weight:@(highlight ? "bold" : "normal")">
+                        @(called ? ball : ".")
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private BingoGame game = new();
+    private string? lastBall;
+    private string[] labels = new[] { "B", "I", "N", "G", "O" };
+    private bool canCall => game.BallsRemaining > 0;
+
+    protected override void OnInitialized()
+    {
+        StartNewRound();
+    }
+
+    private void StartNewRound()
+    {
+        game.StartNewRound();
+        lastBall = null;
+        StateHasChanged();
+    }
+
+    private void CallNextBall()
+    {
+        var ball = game.CallNextBall();
+        if (ball != null)
+        {
+            lastBall = ball;
+        }
+        StateHasChanged();
+    }
+}

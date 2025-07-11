@@ -1,0 +1,163 @@
+﻿@page "/"
+@using VibeBingo.Core
+
+<PageTitle>Bingo Caller</PageTitle>
+
+<h1>Bingo Caller</h1>
+
+
+<div class="mb-3 d-flex align-items-center flex-wrap">
+    <button class="btn btn-primary me-2 mb-2" @onclick="StartNewRound">Start New Round</button>
+    <button class="btn btn-success me-3 mb-2" @onclick="CallNextBall" disabled="@(game.BallsRemaining == 0)">Call Next Ball</button>
+    <!-- TTS Voice selection removed for stability -->
+    <div class="mb-2 me-3">
+        <label for="autoCallDelay" class="form-label me-2">Auto-call:</label>
+        <select id="autoCallDelay" class="form-select d-inline-block w-auto" @onchange="OnAutoCallDelayChanged">
+            <option value="0" selected="@(autoCallDelay == 0)">Disabled</option>
+            <option value="5000" selected="@(autoCallDelay == 5000)">5s</option>
+            <option value="10000" selected="@(autoCallDelay == 10000)">10s</option>
+            <option value="15000" selected="@(autoCallDelay == 15000)">15s</option>
+            <option value="20000" selected="@(autoCallDelay == 20000)">20s</option>
+        </select>
+    </div>
+    <div class="mb-2 me-3">
+        <span class="badge @(autoCallEnabled ? "bg-success" : "bg-secondary")">
+            @(autoCallEnabled ? "Auto-call ON" : "Auto-call OFF")
+        </span>
+    </div>
+    <div class="mb-2">
+        <button class="btn btn-warning" @onclick="ToggleAutoCallPause" disabled="@(autoCallDelay == 0)">
+            @(autoCallPaused ? "Resume Auto-call" : "Pause Auto-call")
+        </button>
+    </div>
+</div>
+
+@if (lastBall != null)
+{
+    <div class="alert alert-info">Last Ball: <strong>@lastBall</strong></div>
+}
+
+<div class="mb-2">Balls Remaining: @game.BallsRemaining</div>
+
+<div class="container">
+    @for (int row = 0; row < 5; row++)
+    {
+        <div class="d-flex align-items-center mb-3 flex-nowrap">
+            <span class="fw-bold me-3" style="width:2em; font-size:1.5em;">@labels[row]</span>
+            <div class="bingo-ball-row">
+                @for (int n = 1 + row * 15; n <= (row + 1) * 15; n++)
+                {
+                    string ball = $"{labels[row]}{n}";
+                    bool called = game.CalledBalls.Contains(ball);
+                    bool highlight = lastBall == ball;
+                    var classes = "bingo-ball" + (called ? " called" : "") + (highlight ? " highlight" : "");
+                    <span class="@classes">
+                        @(called ? ball : "")
+                    </span>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+    private BingoGame game = new();
+    private string? lastBall;
+    private string[] labels = new[] { "B", "I", "N", "G", "O" };
+
+    // TTS voice selection removed
+
+    private int autoCallDelay = 0; // ms
+    private bool autoCallPaused = false;
+    private bool autoCallEnabled => autoCallDelay > 0 && game.BallsRemaining > 0 && !autoCallPaused;
+    private CancellationTokenSource? autoCallCts;
+
+    // TTS voice selection removed
+
+    protected override void OnInitialized()
+    {
+        autoCallDelay = 0; // Ensure auto-caller is disabled at startup
+        autoCallPaused = false;
+        StartNewRound();
+    }
+    // TTS voice selection removed
+
+    private void StartNewRound()
+    {
+        game.StartNewRound();
+        lastBall = null;
+        StopAutoCall();
+        StateHasChanged();
+    }
+
+    private async void CallNextBall()
+    {
+        var ball = game.CallNextBall();
+        if (ball != null)
+        {
+            lastBall = ball;
+            await JS.InvokeVoidAsync("speakBingoBall", ball);
+        }
+        StateHasChanged();
+        // Do NOT start AutoCallBallsAsync here to avoid runaway recursion/loops
+    }
+
+    // TTS voice selection removed
+
+    private async Task OnAutoCallDelayChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int delay))
+        {
+            autoCallDelay = delay;
+        }
+        else
+        {
+            autoCallDelay = 0;
+        }
+        autoCallPaused = false;
+        StopAutoCall();
+        if (autoCallEnabled)
+        {
+            _ = AutoCallBallsAsync();
+        }
+        await Task.CompletedTask;
+    }
+
+    private void ToggleAutoCallPause()
+    {
+        if (autoCallDelay == 0) return;
+        autoCallPaused = !autoCallPaused;
+        StopAutoCall();
+        if (autoCallEnabled)
+        {
+            _ = AutoCallBallsAsync();
+        }
+        StateHasChanged();
+    }
+
+    private async Task AutoCallBallsAsync()
+    {
+        StopAutoCall();
+        if (!autoCallEnabled) return;
+        autoCallCts = new CancellationTokenSource();
+        var token = autoCallCts.Token;
+        while (autoCallEnabled && !token.IsCancellationRequested)
+        {
+            await Task.Delay(autoCallDelay, token);
+            if (!autoCallEnabled || token.IsCancellationRequested) break;
+            CallNextBall();
+            await Task.Yield();
+        }
+    }
+
+    private void StopAutoCall()
+    {
+        autoCallCts?.Cancel();
+        autoCallCts = null;
+    }
+
+    // TTS voice selection removed
+
+    // TTS voice selection removed
+}
