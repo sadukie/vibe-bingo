@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "N6ducz14Rzs=",
+  "success": true,
+  "projectFilePath": "D:\\code\\personal\\vibe-bingo\\VibeBingo.Console\\VibeBingo.Console.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\saduk\\.nuget\\packages\\spectre.console\\0.50.0\\spectre.console.0.50.0.nupkg.sha512",
+    "C:\\Users\\saduk\\.nuget\\packages\\system.memory\\4.6.3\\system.memory.4.6.3.nupkg.sha512",
+    "C:\\Users\\saduk\\.nuget\\packages\\system.speech\\8.0.0\\system.speech.8.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

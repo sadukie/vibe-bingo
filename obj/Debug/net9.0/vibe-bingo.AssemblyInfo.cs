@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("vibe-bingo")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d038f647f5781939da240949f30ce9e6d917a0f3")]
 [assembly: System.Reflection.AssemblyProductAttribute("vibe-bingo")]
 [assembly: System.Reflection.AssemblyTitleAttribute("vibe-bingo")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

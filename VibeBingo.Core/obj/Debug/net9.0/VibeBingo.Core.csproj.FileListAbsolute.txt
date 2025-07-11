@@ -9,3 +9,4 @@ D:\code\personal\vibe-bingo\VibeBingo.Core\obj\Debug\net9.0\VibeBingo.Core.dll
 D:\code\personal\vibe-bingo\VibeBingo.Core\obj\Debug\net9.0\refint\VibeBingo.Core.dll
 D:\code\personal\vibe-bingo\VibeBingo.Core\obj\Debug\net9.0\VibeBingo.Core.pdb
 D:\code\personal\vibe-bingo\VibeBingo.Core\obj\Debug\net9.0\ref\VibeBingo.Core.dll
+D:\code\personal\vibe-bingo\VibeBingo.Core\obj\Debug\net9.0\VibeBingo.Core.sourcelink.json
