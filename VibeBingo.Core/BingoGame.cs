@@ -8,7 +8,8 @@ public enum BingoCallerMode
 {
     Normal,
     Traditional,
-    KidFriendly
+    KidFriendly,
+    Pirate
 }
 
 public class BingoGame
@@ -56,9 +57,29 @@ public class BingoGame
                 return GetTraditionalPrompt(spokenBall);
             case BingoCallerMode.KidFriendly:
                 return GetKidsPrompt(spokenBall);
+            case BingoCallerMode.Pirate:
+                return GetPiratePrompt(spokenBall);
             default:
                 return spokenBall;
         }
+    }
+
+    private string GetPiratePrompt(string spokenBall)
+    {
+        var pirateLines = new[]
+        {
+            $"Arrr! Next up, it's {spokenBall}, matey!",
+            $"Shiver me timbers! {spokenBall} be the call!",
+            $"Yo ho ho! Mark {spokenBall} on yer map!",
+            $"Aye aye! {spokenBall} off the port bow!",
+            $"Raise the anchor! It's {spokenBall}!",
+            $"Avast! {spokenBall} is the treasure ye seek!",
+            $"Blimey! {spokenBall} just sailed in!",
+            $"Heave ho! {spokenBall} is the next booty!",
+            $"X marks the spot for {spokenBall}!",
+            $"All hands on deck for {spokenBall}!"
+        };
+        return pirateLines[rng.Next(pirateLines.Length)];
     }
 
     private string GetBallForSpeech(string ball)
