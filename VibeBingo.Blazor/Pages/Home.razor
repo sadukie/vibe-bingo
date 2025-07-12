@@ -9,7 +9,14 @@
 <div class="mb-3 d-flex align-items-center flex-wrap">
     <button class="btn btn-primary me-2 mb-2" @onclick="StartNewRound">Start New Round</button>
     <button class="btn btn-success me-3 mb-2" @onclick="CallNextBall" disabled="@(game.BallsRemaining == 0)">Call Next Ball</button>
-    <!-- TTS Voice selection removed for stability -->
+    <div class="mb-2 me-3">
+        <label for="callerMode" class="form-label me-2">Caller Mode:</label>
+        <select id="callerMode" class="form-select d-inline-block w-auto" @bind="callerMode">
+            <option value="Normal">Normal</option>
+            <option value="Traditional">Traditional</option>
+            <option value="Sarcastic">Sarcastic</option>
+        </select>
+    </div>
     <div class="mb-2 me-3">
         <label for="autoCallDelay" class="form-label me-2">Auto-call:</label>
         <select id="autoCallDelay" class="form-select d-inline-block w-auto" @onchange="OnAutoCallDelayChanged">
@@ -65,6 +72,11 @@
     private BingoGame game = new();
     private string? lastBall;
     private string[] labels = new[] { "B", "I", "N", "G", "O" };
+    private BingoCallerMode callerMode
+    {
+        get => game.CallerMode;
+        set { game.CallerMode = value; StateHasChanged(); }
+    }
 
     // TTS voice selection removed
 
@@ -97,13 +109,16 @@
         if (ball != null)
         {
             lastBall = ball;
-            await JS.InvokeVoidAsync("speakBingoBall", ball);
+            var prompt = game.GetCallerPrompt(ball);
+            await JS.InvokeVoidAsync("speakBingoBall", prompt);
         }
         StateHasChanged();
         // Do NOT start AutoCallBallsAsync here to avoid runaway recursion/loops
     }
 
     // TTS voice selection removed
+
+    // Show the caller prompt in the UI (optional, e.g. under Last Ball)
 
     private async Task OnAutoCallDelayChanged(ChangeEventArgs e)
     {

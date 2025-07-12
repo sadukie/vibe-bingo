@@ -52,6 +52,29 @@ namespace VibeBingo.ConsoleApp
                 selectedVoice = voices[vidx].Name;
             }
 
+            // Caller mode selection
+            Console.WriteLine("Select Caller Mode:");
+            var modeNames = Enum.GetNames(typeof(BingoCallerMode));
+            for (int i = 0; i < modeNames.Length; i++)
+            {
+                // Show friendly names
+                string display = modeNames[i] switch
+                {
+                    "Normal" => "Normal",
+                    "Traditional" => "Traditional",
+                    "KidFriendly" => "Kid-Friendly",
+                    "Pirate" => "Pirate",
+                    _ => modeNames[i]
+                };
+                Console.WriteLine($"{i}. {display}");
+            }
+            Console.Write($"Enter choice (0-{modeNames.Length - 1}, Enter for Normal): ");
+            var minput = Console.ReadLine();
+            int midx = 0;
+            if (!string.IsNullOrWhiteSpace(minput) && int.TryParse(minput, out int tmpm) && tmpm >= 0 && tmpm < modeNames.Length)
+                midx = tmpm;
+            game.CallerMode = (BingoCallerMode)midx;
+
             int[] delays = { 0, 5000, 10000, 15000, 20000 };
             string[] delayLabels = { "Disabled", "5s", "10s", "15s", "20s" };
             int delayIdx = 0;
@@ -86,17 +109,50 @@ namespace VibeBingo.ConsoleApp
                         if (ball != null)
                         {
                             RedrawGridWithStatus(game);
-                            SpeakBall(ball, selectedVoice);
+                            SpeakBallWithPrompt(game, ball, selectedVoice);
                         }
                     }
-                    for (int i = 0; i < autoDelay / 500 && !autoCallToken.IsCancellationRequested; i++)
+                    int interval = 100;
+                    int waited = 0;
+                    while (waited < autoDelay && !autoCallToken.IsCancellationRequested)
                     {
-                        await Task.Delay(500, autoCallToken);
+                        await Task.Delay(interval, autoCallToken);
+                        waited += interval;
+                        // Check for key press
+                        if (Console.KeyAvailable)
+                        {
+                            var key = Console.ReadKey(true);
+                            if (key.Key == ConsoleKey.P)
+                            {
+                                autoPaused = !autoPaused;
+                                RedrawGridWithStatus(game);
+                            }
+                            else if (key.Key == ConsoleKey.Q)
+                            {
+                                autoCallCts.Cancel();
+                                return;
+                            }
+                        }
                         if (autoPaused) break;
                     }
                     while (autoPaused && !autoCallToken.IsCancellationRequested)
                     {
-                        await Task.Delay(500, autoCallToken);
+                        await Task.Delay(200, autoCallToken);
+                        if (Console.KeyAvailable)
+                        {
+                            var key = Console.ReadKey(true);
+                            if (key.Key == ConsoleKey.P)
+                            {
+                                autoPaused = !autoPaused;
+                                RedrawGridWithStatus(game);
+                                break;
+                            }
+                            else if (key.Key == ConsoleKey.Q)
+                            {
+                                autoCallCts.Cancel();
+                                return;
+                            }
+                        }
                     }
                 }
             }, autoCallToken) : Task.CompletedTask;
@@ -121,7 +177,7 @@ namespace VibeBingo.ConsoleApp
                     if (ball != null)
                     {
                         RedrawGridWithStatus(game);
-                        SpeakBall(ball, selectedVoice);
+                        SpeakBallWithPrompt(game, ball, selectedVoice);
                     }
                 }
             }
@@ -197,7 +253,7 @@ namespace VibeBingo.ConsoleApp
             AnsiConsole.MarkupLine("[grey]Press Enter to call next ball, 'p' to pause/resume auto-call, 'q' to quit this round.[/]");
         }
 
-        static void SpeakBall(string ball, string? voiceName)
+        static void SpeakBallWithPrompt(BingoGame game, string ball, string? voiceName)
         {
             try
             {
@@ -206,7 +262,8 @@ namespace VibeBingo.ConsoleApp
                 {
                     try { synth.SelectVoice(voiceName); } catch { /* ignore if not found */ }
                 }
-                synth.Speak(ball.Replace("B", "B ").Replace("I", "I ").Replace("N", "N ").Replace("G", "G ").Replace("O", "O "));
+                var prompt = game.GetCallerPrompt(ball);
+                synth.Speak(prompt);
             }
             catch
             {

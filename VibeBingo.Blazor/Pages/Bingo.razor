@@ -5,14 +5,23 @@
 
 <h1>Bingo Caller</h1>
 
-<div class="mb-3">
-    <button class="btn btn-primary me-2" @onclick="StartNewRound">Start New Round</button>
-    <button class="btn btn-success" @onclick="CallNextBall" [disabled]="!canCall">Call Next Ball</button>
+<div class="mb-3 d-flex align-items-center flex-wrap">
+    <button class="btn btn-primary me-2 mb-2" @onclick="StartNewRound">Start New Round</button>
+    <button class="btn btn-success me-3 mb-2" @onclick="CallNextBall" disabled="@(game.BallsRemaining == 0)">Call Next Ball</button>
+    <div class="mb-2 me-3">
+        <label for="callerMode" class="form-label me-2">Caller Mode:</label>
+        <select id="callerMode" class="form-select d-inline-block w-auto" @bind="callerMode">
+            <option value="Normal">Normal</option>
+            <option value="Traditional">Traditional</option>
+            <option value="Sarcastic">Sarcastic</option>
+        </select>
+    </div>
 </div>
 
 @if (lastBall != null)
 {
     <div class="alert alert-info">Last Ball: <strong>@lastBall</strong></div>
+    <div class="alert alert-secondary">@game.GetCallerPrompt(lastBall)</div>
 }
 
 <div class="mb-2">Balls Remaining: @game.BallsRemaining</div>
@@ -51,6 +60,11 @@
     private string? lastBall;
     private string[] labels = new[] { "B", "I", "N", "G", "O" };
     private bool canCall => game.BallsRemaining > 0;
+    private BingoCallerMode callerMode
+    {
+        get => game.CallerMode;
+        set { game.CallerMode = value; StateHasChanged(); }
+    }
 
     protected override void OnInitialized()
     {
