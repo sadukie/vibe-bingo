@@ -101,23 +101,22 @@ namespace VibeBingo.ConsoleApp
                 }
             }, autoCallToken) : Task.CompletedTask;
 
-            while (game.BallsRemaining > 0)
+            if (autoDelay == 0)
             {
-                RedrawGridWithStatus(game);
-                var input = Console.ReadLine();
-                if (input?.Trim().ToLower() == "q")
+                while (game.BallsRemaining > 0)
                 {
-                    autoCallCts.Cancel();
-                    break;
-                }
-                if (input?.Trim().ToLower() == "p" && autoDelay > 0)
-                {
-                    autoPaused = !autoPaused;
-                    Console.WriteLine(autoPaused ? "Auto-call paused." : "Auto-call resumed.");
-                    continue;
-                }
-                if (autoDelay == 0 && game.BallsRemaining > 0)
-                {
+                    RedrawGridWithStatus(game);
+                    var input = Console.ReadLine();
+                    if (input?.Trim().ToLower() == "q")
+                    {
+                        autoCallCts.Cancel();
+                        break;
+                    }
+                    if (input?.Trim().ToLower() == "p")
+                    {
+                        // Pause/resume is not relevant when auto-caller is off
+                        continue;
+                    }
                     var ball = game.CallNextBall();
                     if (ball != null)
                     {
@@ -125,6 +124,11 @@ namespace VibeBingo.ConsoleApp
                         SpeakBall(ball, selectedVoice);
                     }
                 }
+            }
+            else
+            {
+                // Only the auto-caller task will update the grid and status
+                autoCallTask.Wait();
             }
             autoCallCts.Cancel();
             try
