@@ -27,24 +27,29 @@
     text-align: center;
     font-size: 1.1em;
     font-weight: normal;
-    background: #f8f9fa;
-    color: #333;
-    border: 1.5px solid #ccc;
-    box-shadow: 0 1px 2px #bbb;
+    background: LemonChiffon;
+    color: DodgerBlue;
+    border: 2px solid DodgerBlue;
+    box-shadow: 0 2px 6px rgba(30,144,255,0.15);
     vertical-align: middle;
     transition: background 0.2s, color 0.2s, font-weight 0.2s;
 }
 .bingo-ball.called {
-    background: #28a745;
+    background: #198754;
     color: #fff;
+    font-weight: bold;
+    border-color: #198754;
 }
 .bingo-ball.highlight {
-    background: #ffe066;
-    color: #333;
+    background: #fffacd;
+    color: #1e90ff;
     font-weight: bold;
+    border-color: #1e90ff;
 }
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background: linear-gradient(135deg, LemonChiffon 0%, DodgerBlue 100%);
+    min-height: 100vh;
 }
 
 h1:focus {
@@ -52,13 +57,31 @@ h1:focus {
 }
 
 a, .btn-link {
-    color: #0071c1;
+    color: #00509e;
+    text-decoration: underline;
+    font-weight: 600;
+    outline: none;
+    transition: color 0.2s, box-shadow 0.2s;
+}
+a:visited, .btn-link:visited {
+    color: #003366;
+}
+a:hover, .btn-link:hover, a:focus, .btn-link:focus {
+    color: #002244;
+    text-decoration: underline;
+    box-shadow: 0 2px 0 0 LemonChiffon;
+    outline: 2px solid #ffd700;
+    outline-offset: 2px;
 }
 
 .btn-primary {
     color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    background-color: #1e90ff;
+    border-color: #1e90ff;
+}
+.btn-primary:hover, .btn-primary:focus {
+    background-color: #187bcd;
+    border-color: #187bcd;
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
